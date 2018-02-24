@@ -12,4 +12,3 @@ x.initializer.run()
 
 # 增加一个减法 sub op, 从 'x' 减去 'a'. 运行减法 op, 输出结果
 sub = tf.subtract(x, a)
-print sub.eval()
