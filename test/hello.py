@@ -8,5 +8,5 @@ product = tf.matmul(matrix1, matrix2)
 with tf.Session() as sess:
     # sess = tf.Session()
     result = sess.run(product)
-    print result
+    print(result)
 # sess.close()
