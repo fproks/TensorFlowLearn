@@ -33,8 +33,8 @@ def run_training():
     data_sets = input_data.read_data_sets('MNIST_data', fake_data=False)  # 下载数据
     # 创建训练图像shape 和标记shape
     with tf.Graph().as_default():
-        images_placeholder = tf.placeholder(tf.float32, shape=(batch_size, mnist.IMAGE_PIXELS))
-        labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size))
+        images_placeholder = tf.placeholder(tf.float32, shape=(batch_size, mnist.IMAGE_PIXELS))  # 输入图
+        labels_placeholder = tf.placeholder(tf.int32, shape=batch_size)  # 标签图
 
         print('images_placeholder 的维度为：', images_placeholder.shape)
         print('lables_placeholder 的维度为:', labels_placeholder.shape)
@@ -44,10 +44,9 @@ def run_training():
             weight = tf.Variable(
                 tf.truncated_normal([mnist.IMAGE_PIXELS, mnist.HIDDEN1_UNITS],
                                     stddev=1.0 / math.sqrt(float(mnist.IMAGE_PIXELS))),
-                name='weights')
+                name='weights')  # 初始化随机
             biases = tf.Variable(tf.zeros([mnist.HIDDEN1_UNITS]), name='biases')
             hidden1 = tf.nn.relu(tf.matmul(images_placeholder, weight) + biases)  # 第一层的计算方法
-
             print('hidden1 的维度为:', hidden1.shape)
 
         # 第二层
@@ -60,7 +59,7 @@ def run_training():
             hidden2 = tf.nn.relu(tf.matmul(hidden1, weight) + biases)
             print('hidden2 的维度为:', hidden2.shape)
 
-        # 连接层
+        # 输出层
         with tf.name_scope('softmax_linear'):
             weight = tf.Variable(
                 tf.truncated_normal([mnist.HIDDEN2_UNITS, mnist.NUM_CLASSES],
@@ -70,18 +69,19 @@ def run_training():
             logits = tf.matmul(hidden2, weight) + biases
             print('logits 的维度为:', logits.shape)
 
-        labels = tf.to_int64(labels_placeholder)
+        labels = tf.to_int64(labels_placeholder)  # 标签一致化
         print('labels 维度:', labels.shape)
         loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+        # 根据稀疏表示的label和输出层数据计算损失  http://blog.csdn.net/cnki_ok/article/details/70243960
         print('loss 的维度为:', loss.shape)
 
-        tf.summary.scalar('loss', loss)
+        tf.summary.scalar('loss', loss)  # 可视化
         optimizer = tf.train.GradientDescentOptimizer(mnist.LEARNING_RATE)  # 设置下降参数
         global_step = tf.Variable(0, name='global_step', trainable=False)
         train_op = optimizer.minimize(loss, global_step=global_step)  # 训练目标
 
         correct = tf.nn.in_top_k(logits, labels_placeholder, 1)
-        eval_correct = tf.reduce_sum(tf.cast(correct, tf.int32))
+        eval_correct = tf.reduce_sum(tf.cast(correct, tf.int32))  # 正确率获取图
 
         summary = tf.summary.merge_all()
         init = tf.global_variables_initializer()
@@ -138,5 +138,4 @@ def main():
 
 
 if __name__ == '__main__':
-    # tf.app.run(main=main, argv=[sys.argv[0]])
     main()
